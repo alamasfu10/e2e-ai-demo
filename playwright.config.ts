@@ -18,5 +18,10 @@ export default defineConfig({
       use: { ...devices['Desktop Chrome'] },
     },
   ],
-  // El servidor dev se arranca externamente antes de correr los tests
+  webServer: {
+    command: 'npm run dev -- --port 3001',
+    url: 'http://localhost:3001',
+    reuseExistingServer: true,
+    timeout: 30_000,
+  },
 })

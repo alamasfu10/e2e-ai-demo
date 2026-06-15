@@ -22,40 +22,30 @@ test.describe('Landing page — carga y formulario', () => {
     await expect(btn).toBeVisible()
   })
 
-  test('rellena el formulario y envía — estado cambia a loading o success', async ({ page }) => {
-    // Interceptamos la llamada a /api/leads para no depender de la BD real
-    // pero dejamos pasar la respuesta original (puede ser 201 o 500, ambos válidos)
+  test('rellena el formulario y envía — estado cambia a success (API mockeada)', async ({ page }) => {
+    // Mock de /api/leads para no insertar en la BD real durante E2E
     let apiCalled = false
-    page.on('response', (response) => {
-      if (response.url().includes('/api/leads')) {
-        apiCalled = true
-      }
+    await page.route('**/api/leads', async (route) => {
+      apiCalled = true
+      await route.fulfill({
+        status: 201,
+        contentType: 'application/json',
+        body: JSON.stringify({ ok: true }),
+      })
     })
 
-    // Rellena campos requeridos usando name para evitar ambigüedad de placeholder
     await page.locator('input[name="nombre"]').fill('Test')
     await page.locator('input[name="apellido"]').fill('E2E')
     await page.locator('input[name="email_empresa"]').fill('test@empresa.com')
     await page.locator('input[name="empresa"]').fill('Empresa E2E')
 
-    // El checkbox ya está marcado por defecto (defaultChecked)
     const checkbox = page.locator('input[name="acepta_comunicaciones"]')
     await expect(checkbox).toBeChecked()
 
-    // Click en submit
     const btn = page.getByRole('button', { name: /reservar plaza/i })
     await btn.click()
 
-    // Espera que el botón cambie de estado (loading o disappears on success)
-    // Usamos un selector amplio: el botón desaparece en success o muestra "Enviando…"
-    await expect(
-      page.locator('button[type="submit"]').filter({ hasText: /enviando/i })
-        .or(page.locator('text=¡Gracias por registrarte!'))
-        .or(page.locator('button[type="submit"]').filter({ hasText: /reservar plaza/i }))
-    ).toBeVisible({ timeout: 10_000 })
-
-    // La llamada a la API debe haberse realizado
-    await page.waitForTimeout(2_000)
+    await expect(page.getByText('¡Gracias por registrarte!', { exact: true })).toBeVisible({ timeout: 10_000 })
     expect(apiCalled).toBe(true)
   })
 })

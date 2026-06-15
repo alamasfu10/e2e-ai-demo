@@ -21,11 +21,12 @@ El "deploy" consiste en validar `main` y promoverla a `prod`.
    - Si falla: para y reporta.
 3. **Lint:** ejecuta `npm run lint`.
    - Si falla: para y reporta.
-4. **Commit:** si hay cambios sin commitear, haz `git add` de los ficheros relevantes
-   y `git commit` con un mensaje descriptivo. Si no hay cambios, omite este paso.
-5. **Push a prod:** ejecuta `git push origin main:prod`.
+4. **Commit:** si hay cambios sin commitear, haz `git add` de los ficheros relevantes y `git commit` con un mensaje descriptivo. Si no hay cambios, omite este paso.
+5. **Push a main remoto:** ejecuta `git push origin main`.
+   Sincroniza el estado local con el remoto antes de promocionar.
+6. **Push a prod:** ejecuta `git push origin main:prod`.
    Esto promueve el estado actual de `main` a la rama de producción.
-6. **Reporta:** confirma que el push se hizo e indica que Vercel está construyendo.
+7. **Reporta:** confirma que el push se hizo e indica que Vercel está construyendo.
    Recuerda al usuario dónde ver el estado (dashboard de Vercel).
 
 ## Reglas

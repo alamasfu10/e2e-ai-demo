@@ -1,0 +1,105 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Design system base variables ──────────────────────────────────────── */
+:root {
+  /* Surfaces */
+  --surface-page:    #F1F1EE;
+  --surface-inverse: #000000;
+  --surface-pill:    #E8E8E5;
+
+  /* Text */
+  --text-strong:         #0A0A0A;
+  --text-quiet:          #8A8A86;
+  --text-muted:          #B8B8B3;
+  --text-inverse:        #FFFFFF;
+  --text-inverse-quiet:  rgba(255,255,255,0.72);
+
+  /* Borders */
+  --border-hairline: rgba(10,10,10,0.08);
+
+  /* Actions */
+  --action-primary-bg:   #0A0A0A;
+  --action-primary-fg:   #FFFFFF;
+  --action-inverse-bg:   #FFFFFF;
+  --action-inverse-fg:   #0A0A0A;
+}
+
+html, body {
+  background: var(--surface-page);
+  color: var(--text-strong);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ── Underline input style (matching DS --radius-input: 0) ─────────────── */
+.field-underline {
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid rgba(255,255,255,0.28);
+  border-radius: 0;
+  outline: none;
+  width: 100%;
+  padding: 12px 0 10px;
+  font-size: 15px;
+  color: #FFFFFF;
+  transition: border-color 0.18s ease;
+}
+
+.field-underline::placeholder {
+  color: rgba(255,255,255,0.42);
+}
+
+.field-underline:focus {
+  border-bottom-color: rgba(255,255,255,0.88);
+}
+
+/* Light surface variant */
+.field-underline-light {
+  border-bottom-color: rgba(10,10,10,0.18);
+  color: #0A0A0A;
+}
+
+.field-underline-light::placeholder {
+  color: rgba(10,10,10,0.38);
+}
+
+.field-underline-light:focus {
+  border-bottom-color: rgba(10,10,10,0.72);
+}
+
+/* ── Checkbox custom ────────────────────────────────────────────────────── */
+.cb-check {
+  appearance: none;
+  width: 18px; height: 18px;
+  min-width: 18px;
+  border: 1.5px solid rgba(255,255,255,0.4);
+  border-radius: 4px;
+  background: transparent;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+  position: relative;
+}
+
+.cb-check:checked {
+  background: #FFFFFF;
+  border-color: #FFFFFF;
+}
+
+.cb-check:checked::after {
+  content: '';
+  position: absolute;
+  left: 4px; top: 1px;
+  width: 6px; height: 10px;
+  border: 2px solid #0A0A0A;
+  border-top: 0; border-left: 0;
+  transform: rotate(45deg);
+}
+
+/* ── Button hover/active micro-interactions ────────────────────────────── */
+.btn-pill {
+  transition: transform 0.18s ease, opacity 0.12s ease;
+}
+.btn-pill:hover  { opacity: 0.92; transform: translateY(-1px); }
+.btn-pill:active { transform: scale(0.985); }

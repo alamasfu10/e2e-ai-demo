@@ -1,9 +1,10 @@
 import { fetchLandingContent } from '@/lib/storyblok'
-import Header      from '@/components/Header'
-import Hero        from '@/components/Hero'
-import DetailStrip from '@/components/DetailStrip'
-import FormSection from '@/components/FormSection'
-import Footer      from '@/components/Footer'
+import Header         from '@/components/Header'
+import Hero           from '@/components/Hero'
+import DetailStrip    from '@/components/DetailStrip'
+import FormSection    from '@/components/FormSection'
+import Footer         from '@/components/Footer'
+import PageAnalytics  from '@/components/PageAnalytics'
 
 export const revalidate = 3600
 
@@ -12,6 +13,11 @@ export default async function LandingPage() {
 
   return (
     <main style={{ background: '#F1F1EE', minHeight: '100vh' }}>
+      <PageAnalytics
+        eventName={content.hero_title}
+        eventDate={content.event_date}
+        eventLocation={content.event_location}
+      />
       <Header />
       <Hero
         title={content.hero_title}

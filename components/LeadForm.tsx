@@ -1,20 +1,20 @@
 'use client'
 
-import { useState, FormEvent } from 'react'
+import { useState, useRef, FormEvent } from 'react'
 import { sendGAEvent } from '@next/third-parties/google'
 
 interface Field {
-  name:        string
-  label:       string
-  type?:       string
-  required?:   boolean
+  name:      string
+  label:     string
+  type?:     string
+  required?: boolean
 }
 
 const FIELDS: Field[] = [
-  { name: 'nombre',        label: 'Nombre',                required: true },
-  { name: 'apellido',      label: 'Apellido',              required: true },
-  { name: 'email_empresa', label: 'Email de empresa',      type: 'email', required: true },
-  { name: 'empresa',       label: 'Empresa',               required: true },
+  { name: 'nombre',        label: 'Nombre',           required: true },
+  { name: 'apellido',      label: 'Apellido',         required: true },
+  { name: 'email_empresa', label: 'Email de empresa', type: 'email', required: true },
+  { name: 'empresa',       label: 'Empresa',          required: true },
   { name: 'cargo',         label: 'Cargo' },
   { name: 'tamano_equipo', label: 'Tamaño de tu equipo' },
 ]
@@ -22,8 +22,23 @@ const FIELDS: Field[] = [
 type Status = 'idle' | 'loading' | 'success' | 'error'
 
 export default function LeadForm() {
-  const [status, setStatus] = useState<Status>('idle')
-  const [error, setError] = useState('')
+  const [status, setStatus]       = useState<Status>('idle')
+  const [error, setError]         = useState('')
+  const formStartedRef            = useRef(false)
+
+  function handleFieldFocus() {
+    if (formStartedRef.current) return
+    formStartedRef.current = true
+    sendGAEvent('event', 'form_start', { form_id: 'reserva_plaza' })
+  }
+
+  function handleButtonClick() {
+    sendGAEvent('event', 'button_click', {
+      button_id:   'submit_reserva',
+      button_text: 'Reservar plaza',
+      form_id:     'reserva_plaza',
+    })
+  }
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -32,29 +47,41 @@ export default function LeadForm() {
 
     const form = e.currentTarget
     const data = Object.fromEntries(new FormData(form).entries())
+    const params = new URLSearchParams(window.location.search)
 
     const body = {
-      nombre:               String(data.nombre ?? '').trim(),
-      apellido:             String(data.apellido ?? '').trim(),
-      email_empresa:        String(data.email_empresa ?? '').trim().toLowerCase(),
-      empresa:              String(data.empresa ?? '').trim(),
-      cargo:                String(data.cargo ?? '').trim() || undefined,
-      tamano_equipo:        String(data.tamano_equipo ?? '').trim() || undefined,
+      nombre:                String(data.nombre        ?? '').trim(),
+      apellido:              String(data.apellido      ?? '').trim(),
+      email_empresa:         String(data.email_empresa ?? '').trim().toLowerCase(),
+      empresa:               String(data.empresa       ?? '').trim(),
+      cargo:                 String(data.cargo         ?? '').trim() || undefined,
+      tamano_equipo:         String(data.tamano_equipo ?? '').trim() || undefined,
       acepta_comunicaciones: data.acepta_comunicaciones === 'on',
-      utm_source:   new URLSearchParams(window.location.search).get('utm_source')   ?? undefined,
-      utm_medium:   new URLSearchParams(window.location.search).get('utm_medium')   ?? undefined,
-      utm_campaign: new URLSearchParams(window.location.search).get('utm_campaign') ?? undefined,
+      utm_source:   params.get('utm_source')   ?? undefined,
+      utm_medium:   params.get('utm_medium')   ?? undefined,
+      utm_campaign: params.get('utm_campaign') ?? undefined,
     }
 
     try {
-      const res = await fetch('/api/leads', {
+      const res  = await fetch('/api/leads', {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
         body:    JSON.stringify(body),
       })
       const json = await res.json()
       if (!res.ok || !json.ok) throw new Error(json.error ?? 'Error desconocido')
-      sendGAEvent('event', 'generate_lead', { event_category: 'form' })
+
+      // generate_lead con atributos del formulario (sin PII)
+      sendGAEvent('event', 'generate_lead', {
+        form_id:               'reserva_plaza',
+        cargo:                 body.cargo         ?? '(no indicado)',
+        tamano_equipo:         body.tamano_equipo ?? '(no indicado)',
+        acepta_comunicaciones: body.acepta_comunicaciones,
+        utm_source:            body.utm_source   ?? '(direct)',
+        utm_medium:            body.utm_medium   ?? '(none)',
+        utm_campaign:          body.utm_campaign ?? '(none)',
+      })
+
       setStatus('success')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al enviar')
@@ -95,6 +122,7 @@ export default function LeadForm() {
             placeholder={field.label}
             required={field.required}
             disabled={status === 'loading'}
+            onFocus={handleFieldFocus}
             className="field-underline"
           />
         ))}
@@ -135,18 +163,19 @@ export default function LeadForm() {
       <div>
         <button
           type="submit"
+          onClick={handleButtonClick}
           disabled={status === 'loading'}
           className="btn-pill inline-flex items-center justify-center gap-[10px] h-14 px-8 rounded-pill border-0"
           style={{
-            background: '#FFFFFF',
-            color: '#0A0A0A',
-            fontFamily: 'var(--font-inter)',
-            fontWeight: 700,
-            fontSize: 14,
+            background:    '#FFFFFF',
+            color:         '#0A0A0A',
+            fontFamily:    'var(--font-inter)',
+            fontWeight:    700,
+            fontSize:      14,
             letterSpacing: '0.12em',
             textTransform: 'uppercase',
-            cursor: status === 'loading' ? 'wait' : 'pointer',
-            opacity: status === 'loading' ? 0.7 : 1,
+            cursor:  status === 'loading' ? 'wait'    : 'pointer',
+            opacity: status === 'loading' ? 0.7       : 1,
           }}
         >
           <span>{status === 'loading' ? 'Enviando…' : 'Reservar plaza'}</span>

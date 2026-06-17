@@ -1,0 +1,16 @@
+.git
+.gitignore
+.env*
+.next
+node_modules
+npm-debug.log*
+README.md
+RESUMEN.md
+Dockerfile
+.dockerignore
+.claude
+scripts
+tests
+e2e
+playwright-report
+test-results

@@ -52,6 +52,9 @@ export default function Hero({ title, description, eyebrowLabel }: HeroProps) {
           </svg>
         </div>
 
+        {/* Content — z-index above decoratives */}
+        <div className="relative" style={{ zIndex: 1 }}>
+
         {/* Eyebrow */}
         <div
           className="inline-flex items-center gap-2 mb-8"
@@ -109,6 +112,7 @@ export default function Hero({ title, description, eyebrowLabel }: HeroProps) {
           <CtaButton />
         </div>
 
+        </div>{/* end content */}
       </div>
     </section>
   )
